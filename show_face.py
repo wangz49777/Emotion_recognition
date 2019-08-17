@@ -3,7 +3,7 @@ import cv2
 import os
 import numpy as np
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 img_size=48
 emo_labels = ['angry', 'disgust:', 'fear', 'happy', 'sad', 'surprise', 'neutral']
 num_class = len(emo_labels)
@@ -39,7 +39,6 @@ while True:
             x, y, w, h = face
             images=[]
             rs_sum=np.array([0.0]*num_class)
-                        #截取脸部图像提交给模型识别这是谁
             image = frame_gray[y: y + h, x: x + w ]
             image = np.resize(image, (default_size, default_size, channel))
             images.append(image)
@@ -48,7 +47,6 @@ while True:
             
             softmax_ = sess.run(softmax, {x_input: images, dropout: 1.0})
             class_ = np.argmax(softmax_, axis= 1)
-            print(class_[0])          
             emo = emo_labels[class_[0]]
             print ('Emotion : ',emo)
 #             cv2.rectangle(frame, (x - 20, y - 20), (x + w + 20, y + h + 20), (0, 255, 255), thickness=10)
