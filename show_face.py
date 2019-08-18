@@ -4,16 +4,15 @@ import os
 import numpy as np
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-img_size=48
 emo_labels = ['angry', 'disgust:', 'fear', 'happy', 'sad', 'surprise', 'neutral']
 num_class = len(emo_labels)
 
-data_folder_name = './model/'
+model_path = './model/'
 default_size = 48
 channel = 1
-ckpt_name = 'cnn_emotion_classifier.ckpt'
-ckpt_path = os.path.join(data_folder_name, ckpt_name)
-cascade_path = data_folder_name + "haarcascade_frontalface_alt.xml"   
+# ckpt_name = 'cnn_emotion_classifier.ckpt'
+ckpt_path = os.path.join(model_path, 'cnn_emotion_classifier.ckpt')
+cascade_path = os.path.join(model_path, 'haarcascade_frontalface_alt.xml')
 
 gpu_options = tf.GPUOptions(allow_growth = True)
 config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True)
@@ -31,8 +30,8 @@ cap = cv2.VideoCapture(0)
 
 while True:
     b, frame = cap.read()       
-    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)    
-    cascade = cv2.CascadeClassifier(cascade_path)                
+    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    cascade = cv2.CascadeClassifier(cascade_path)
     faceRects = cascade.detectMultiScale(frame_gray, scaleFactor = 1.1, minNeighbors = 1, minSize = (120, 120))  
     if len(faceRects) > 0:
         for face in faceRects:
@@ -44,7 +43,6 @@ while True:
             images.append(image)
             images = np.array(images)
             images = np.multiply(np.array(images), 1. / 255)
-            
             softmax_ = sess.run(softmax, {x_input: images, dropout: 1.0})
             class_ = np.argmax(softmax_, axis= 1)
             emo = emo_labels[class_[0]]

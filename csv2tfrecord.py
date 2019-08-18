@@ -12,11 +12,11 @@ data_folder_name = 'data'
 csv_file_name = 'fer2013.csv'
 record_name_train = 'fer2013_train.tfrecord'
 record_name_test = 'fer2013_test.tfrecord'
-record_name_eval = 'fer2013_eval.tfrecord'
+record_name_val = 'fer2013_val.tfrecord'
 csv_path = os.path.join(data_folder_name, csv_file_name)
 record_path_train = os.path.join(data_folder_name, record_name_train)
 record_path_test = os.path.join(data_folder_name, record_name_test)
-record_path_eval = os.path.join(data_folder_name, record_name_eval)
+record_path_val = os.path.join(data_folder_name, record_name_val)
 
 with open(csv_path, 'r') as f:
     csvr = csv.reader(f)
@@ -45,7 +45,7 @@ def write_binary(record_name_, labels_images_, height_ = default_height, width_ 
 def main(argv = None):
     write_binary(record_path_train, trn)
     write_binary(record_path_test, tst)
-    write_binary(record_path_eval, val)
+    write_binary(record_path_val, val)
 
 if __name__ == '__main__':
     main()

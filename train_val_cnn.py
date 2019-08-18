@@ -9,27 +9,28 @@ channel = 1  # 图像通道数
 default_height = 48  # 图像宽高
 default_width = 48
 batch_size = 256  # 批尺寸，内存小就调小些
-test_batch_size = 256  # 测试时的批尺寸，内存小就调小些
+val_batch_size = 256  # 测试时的批尺寸，内存小就调小些
 shuffle_pool_size = 4000 # 内存小就调小些
 generations = 60  # 总迭代数
 retrain = False # 是否要继续之前的训练
 data_folder_name = 'data/'
 model_path = 'model'
 record_name_train = data_folder_name + 'fer2013_train.tfrecord'
-record_name_test = data_folder_name + 'fer2013_test.tfrecord'
-# record_name_eval = data_folder_name + 'fer2013_eval.tfrecord'
-save_ckpt_name = 'cnn_emotion_classifier.ckpt'
-model_log_name = 'model_log.txt'
-tensorboard_name = 'tensorboard'
+# record_name_test = data_folder_name + 'fer2013_test.tfrecord'
+record_name_eval = data_folder_name + 'fer2013_eval.tfrecord'
+save_ckpt_name = 'cnn_emotion_classifier.ckpt' #模型保存文件
+model_log_name = 'model_log.txt' #模型日志
+tensorboard_name = 'tensorboard' #网络模型可视化
 tensorboard_path = os.path.join(data_folder_name, tensorboard_name)
+model_save_path = os.path.join(data_folder_name, model_path, save_ckpt_name)
 model_log_path = os.path.join(data_folder_name, model_path, model_log_name)
 #数据增强
 def pre_process_img(image):
-    image = tf.image.random_flip_left_right(image)
-    image = tf.image.random_brightness(image, max_delta=32./255)
-    image = tf.image.random_contrast(image, lower=0.8, upper=1.2)
-    image = tf.random_crop(image, [default_height-np.random.randint(0, 4), default_width-np.random.randint(0, 4), 1])
-    image = tf.image.resize_images(image, [default_height, default_width])
+    image = tf.image.random_flip_left_right(image) #按水平 (从左向右) 随机翻转图像
+    image = tf.image.random_brightness(image, max_delta=32./255) #通过随机因子调整图像的亮度
+    image = tf.image.random_contrast(image, lower=0.8, upper=1.2) #通过随机因子调整图像的对比度
+    image = tf.random_crop(image, [default_height-np.random.randint(0, 4), default_width-np.random.randint(0, 4), 1]) #随机地将张量裁剪为给定的大小
+    image = tf.image.resize_images(image, [default_height, default_width]) #使用指定的method调整images为size
     return image
 #读入tfrecord数据
 #解析feature信息
@@ -54,13 +55,13 @@ def time_():
     return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
 
 def main(argv):
-    data_set_train = get_dataset(record_name_train)
-    data_set_train = data_set_train.shuffle(shuffle_pool_size).batch(batch_size).repeat()
+    data_set_train = get_dataset(record_name_train) #读取训练数据
+    data_set_train = data_set_train.shuffle(shuffle_pool_size).batch(batch_size).repeat() #打乱，分批
     data_set_train_iter = data_set_train.make_one_shot_iterator()
 
-    data_set_test = get_dataset(record_name_test)
-    data_set_test = data_set_test.shuffle(shuffle_pool_size).batch(batch_size).repeat()
-    data_set_test_iter = data_set_test.make_one_shot_iterator()
+    data_set_val = get_dataset(record_name_val)
+    data_set_val = data_set_val.shuffle(shuffle_pool_size).batch(batch_size).repeat()
+    data_set_val_iter = data_set_val.make_one_shot_iterator()
 
     handle = tf.placeholder(tf.string, shape=[], name='handle')
     iterator = tf.data.Iterator.from_string_handle(handle, data_set_train.output_types, data_set_train.output_shapes)
@@ -77,17 +78,17 @@ def main(argv):
     with tf.name_scope('Loss_and_Accuracy'):
         tf.summary.scalar('Loss', loss)
         tf.summary.scalar('Accuracy', accuracy)
-        summary_op = tf.summary.merge_all()
+        summary_op = tf.summary.merge_all() #统计loss，accuracy
 
     saver = tf.train.Saver(max_to_keep=1)
     max_accuracy = 0
-    gpu_options = tf.GPUOptions(allow_growth = True)
+    gpu_options = tf.GPUOptions(allow_growth = True) #按需求分配GPU内存
     config = tf.ConfigProto(gpu_options = gpu_options)
     with tf.Session(config = config) as sess:
         summary_writer = tf.summary.FileWriter(tensorboard_path, sess.graph)
-        sess.run(tf.global_variables_initializer())
+        sess.run(tf.global_variables_initializer()) #初始化变量
         train_handle = sess.run(data_set_train_iter.string_handle())
-        test_handle = sess.run(data_set_test_iter.string_handle())
+        val_handle = sess.run(data_set_val_iter.string_handle())
 
         for i in range(1, generations + 1):
             x_batch, y_batch = sess.run([x_input_bacth, y_target_batch], feed_dict={handle: train_handle})
@@ -98,14 +99,15 @@ def main(argv):
                 print('{} : Generation # {}. Train Loss : {:.3f} . '  'Train Acc : {:.3f}. '.format(time_(), i, train_loss, train_accuracy))
                 summary_writer.add_summary(sess.run(summary_op, train_feed_dict), i)
             if i % 20 == 0:
-                test_x_batch, test_y_batch = sess.run([x_input_bacth, y_target_batch], feed_dict={handle: test_handle})
-                test_feed_dict = {x_input: test_x_batch, y_target: test_y_batch, dropout: 1.0}
-                test_loss, test_accuracy = sess.run([loss, accuracy], test_feed_dict)
-                print('{} : Generation # {}. Test Loss : {:.3f} . '  'Test Acc : {:.3f}. '.format(time_(), i, test_loss, test_accuracy))
+                val_x_batch, val_y_batch = sess.run([x_input_bacth, y_target_batch], feed_dict={handle: val_handle})
+                val_feed_dict = {x_input: val_x_batch, y_target: val_y_batch, dropout: 1.0}
+                val_loss, val_accuracy = sess.run([loss, accuracy], val_feed_dict)
+                print('{} : Generation # {}. val Loss : {:.3f} . '  'val Acc : {:.3f}. '.format(time_(), i, val_loss, val_accuracy))
                 summary_writer.add_summary(sess.run(summary_op, train_feed_dict), i)
-                if test_accuracy >= max_accuracy and i > generations / 2:
-                    max_accuracy = test_accuracy
-                    saver.save(sess, os.path.join(data_folder_name, save_ckpt_name))
+                if val_accuracy >= max_accuracy and i > generations / 2:
+                    max_accuracy = val_accuracy
+                    # saver.save(sess, os.path.join(model_save_path, save_ckpt_name))
+                    saver.save(sess, os.path.join(model_save_path))
                     print('{} : Generation # {}. --model saved--'.format(time_(), i))
         print('Last accuracy : ', max_accuracy)
 

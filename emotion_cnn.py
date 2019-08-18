@@ -4,36 +4,35 @@ from tensorflow.contrib.layers.python.layers import initializers
 class Emotion_cnn():
     def __init__(self):
         with tf.name_scope("parameters"):
-            self.class_num = 7
-            self.channel = 1
-            self.hidden_dim = 1024
-            self.full_shape = 2304
-            self.optimizer_ = 'Adam'
+            self.class_num = 7 #类别个数
+            self.channel = 1 #图像通道个数
+            self.hidden_dim = 1024 #全连接层维度
+            self.full_shape = 2304 #
+            self.optimizer_ = 'Adam' #优化算法
         with tf.name_scope("input"):
-            self.x_input = tf.placeholder(dtype=tf.float32, shape=[None, None, None, self.channel], name='x_input')
+            self.x_input = tf.placeholder(dtype=tf.float32, shape=[None, None, None, self.channel], name='x_input') #输入数据
         with tf.name_scope("y_target"):
-            self.y_target = tf.placeholder(dtype=tf.int32, shape=[None], name='y_target')
+            self.y_target = tf.placeholder(dtype=tf.int32, shape=[None], name='y_target') #标签
         with tf.name_scope("cnn_structure"):
-            self.pool_size = [0, 3, 3, 3]
-            self.pool_stride = [0, 2, 2, 2]
-            self.maxpool_ksize = [1, 3, 3, 1]
-            self.maxpool_strides = [1, 2, 2, 1]
-            self.padding = "SAME"
-            self.activation = "relu"
-            self.initializer = initializers.xavier_initializer()
-            self.filter = [[1, 1, 1, 32], [5, 5, 32, 32], [3, 3, 32, 32], [5, 5, 32, 64]]
-            self.bias = [32, 32, 32, 64]
-            self.strides = [1, 1, 1, 1]
-            self.batch_size = tf.shape(self.x_input)[0]
+            self.maxpool_ksize = [1, 3, 3, 1] #池化窗口大小，[batch, height, width, channel]
+            self.maxpool_strides = [1, 2, 2, 1] #窗口滑动的步长
+            self.padding = "SAME" #补丁类型
+            self.activation = "relu" #激活函数
+            self.initializer = initializers.xavier_initializer() #变量初始化方法
+            self.filter = [[1, 1, 1, 32], [5, 5, 32, 32], [3, 3, 32, 32], [5, 5, 32, 64]] #卷积核尺寸
+            self.bias = [32, 32, 32, 64] #偏置
+            self.strides = [1, 1, 1, 1] #卷积步长
+            self.batch_size = tf.shape(self.x_input)[0] #批数量
         with tf.name_scope("hyperparameters"):
-            self.lr = 0.001
-            self.dropout = tf.placeholder(dtype=tf.float32, name='dropout')
-            self.depth_radius = 5
-            self.norm_bias = 2.0
-            self.alpha = 1e-3
-            self.beta = 0.75
+            self.lr = 0.001 #学习速率
+            self.dropout = tf.placeholder(dtype=tf.float32, name='dropout') #
+            self.depth_radius = 5 #归一化半径？
+            self.norm_bias = 2.0 #归一化偏置？
+            self.alpha = 1e-3 #？？
+            self.beta = 0.75 #？？
 #         with tf.name_scope("evaluate"):
 #         self.loss, self.accuracy = self.loss_accuracy(self.output_layer(self.cnn_layer()), self.y_target)
+    # 定义卷积核
     def weight_variable(self, name, shape):
         with tf.variable_scope("weight"):
             weight = tf.get_variable(name, shape, dtype=tf.float32, initializer=self.initializer)
@@ -42,6 +41,7 @@ class Emotion_cnn():
         with tf.variable_scope("bias"):
             bias = tf.get_variable(name, shape, dtype=tf.float32, initializer=self.initializer)
         return bias
+    # 定义卷积层
     def cnn_layer(self):
         with tf.name_scope("conv1"):
             conv1_weight = self.weight_variable('conv1_weight', self.filter[0])
@@ -71,6 +71,7 @@ class Emotion_cnn():
             pool4 = tf.nn.max_pool(conv4_relu, self.maxpool_ksize, self.maxpool_strides, self.padding, name = 'pool_layer4')
             norm4 = tf.nn.lrn(pool4, self.depth_radius, self.norm_bias, self.alpha, self.beta, 'norm4')
         return norm4
+    #输出层，全连接+softmax
     def output_layer(self, fc_input):
         with tf.name_scope("output_layer"):
             with tf.name_scope("fully_connected_layer1"):
@@ -89,6 +90,7 @@ class Emotion_cnn():
                 out_bias = self.bias_variable('out_bias', [self.class_num])
                 fc_output = tf.add(tf.matmul(output2, out_weight), out_bias, name = 'fc_output')
         return fc_output
+    #损失函数和准确率
     def loss_accuracy(self, logits_, label_):
         with tf.name_scope("loss"):
             loss_ = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits = logits_, labels = label_), name = 'cross_entropy_loss')
@@ -96,6 +98,7 @@ class Emotion_cnn():
             softmax = tf.nn.softmax(logits_, name = 'softmax')
             accuracy_ = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(softmax, axis = 1),tf.cast(label_, tf.int64)), tf.float32), name = 'accuracy')
         return loss_, accuracy_
+    #优化方法
     def optimizer(self, loss_):
         with tf.name_scope("optimizer"):
             train_step_ = tf.train.AdamOptimizer(self.lr).minimize(loss_, name = 'train_step')
