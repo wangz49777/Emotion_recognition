@@ -1,8 +1,5 @@
 # 表情识别
 
-<img src="src/happy.png" width="160px"/>
-![happy](https://github.com/wangz49777/Emotion_recognition/blob/master/src/happy.png)
-
 使用卷积神经网络训练表情识别算法，实现实时读取识别摄像头人脸并识别表情
 
 ## 实验环境
@@ -36,10 +33,9 @@ python read_test_cnn.py
 
 #### FER 和 FERPlus
 
-![FERvsFER+](https://github.com/wangz49777/Emotion_recognition/src/FER+vsFER.png)
 ![FERvsFER+](https://github.com/wangz49777/Emotion_recognition/blob/branch1/src/FER%2BvsFER.png)
 
-FER(上)和FER+(下)
+FER(上)和FERPlus(下)
 
 ## 版权说明
 
