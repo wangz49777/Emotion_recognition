@@ -33,7 +33,7 @@ python read_test_cnn.py
 
 #### FER 和 FERPlus
 
-<img src="src/FER+vsFER.png" width="586px"/>
+![FER+vsFER](https://github.com/wangz49777/Emotion_recognition/src/FER+vsFER.png)
 
 FER(上)和FER+(下)
 
