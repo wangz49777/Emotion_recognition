@@ -11,22 +11,26 @@ default_width = 48
 batch_size = 256  # 批尺寸，内存小就调小些
 val_batch_size = 256  # 测试时的批尺寸，内存小就调小些
 shuffle_pool_size = 4000 # 内存小就调小些
-generations = 60  # 总迭代数
+generations = 600 # 总迭代数
 retrain = False # 是否要继续之前的训练
-data_folder_name = 'data/'
-model_path = 'model'
-record_name_train = data_folder_name + 'fer2013_train.tfrecord'
-# record_name_test = data_folder_name + 'fer2013_test.tfrecord'
-record_name_val = data_folder_name + 'fer2013_eval.tfrecord'
-save_ckpt_name = 'cnn_emotion_classifier.ckpt' #模型保存文件
+data_folder_name = 'data'
+model_path = 'trainmodel'
+record_train = 'fer2013_train.tfrecord'
+record_test = 'fer2013_test.tfrecord'
+record_val = 'fer2013_val.tfrecord'
+save_ckpt_name = 'emotion_cnn.ckpt' #模型保存文件
 model_log_name = 'model_log.txt' #模型日志
 tensorboard_name = 'tensorboard' #网络模型可视化
+dataset_folder = 'FER'
+
+train_path = os.path.join(data_folder_name, dataset_folder, record_train)
+val_path = os.path.join(data_folder_name, dataset_folder, record_val)
 tensorboard_path = os.path.join(data_folder_name, tensorboard_name)
 model_save_path = os.path.join(data_folder_name, model_path, save_ckpt_name)
-model_log_path = os.path.join(data_folder_name, model_path, model_log_name)
+#model_log_path = os.path.join(data_folder_name, model_path, model_log_name)
 #数据增强
 def pre_process_img(image):
-    image = tf.image.random_flip_left_right(image) #按水平 (从左向右) 随机翻转图像
+    image = tf.mage.random_flip_left_right(image) #按水平 (从左向右) 随机翻转图像
     image = tf.image.random_brightness(image, max_delta=32./255) #通过随机因子调整图像的亮度
     image = tf.image.random_contrast(image, lower=0.8, upper=1.2) #通过随机因子调整图像的对比度
     image = tf.random_crop(image, [default_height-np.random.randint(0, 4), default_width-np.random.randint(0, 4), 1]) #随机地将张量裁剪为给定的大小
@@ -55,11 +59,11 @@ def time_():
     return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
 
 def main(argv):
-    data_set_train = get_dataset(record_name_train) #读取训练数据
+    data_set_train = get_dataset(train_path) #读取训练数据
     data_set_train = data_set_train.shuffle(shuffle_pool_size).batch(batch_size).repeat() #打乱，分批
     data_set_train_iter = data_set_train.make_one_shot_iterator()
 
-    data_set_val = get_dataset(record_name_val)
+    data_set_val = get_dataset(val_path)
     data_set_val = data_set_val.shuffle(shuffle_pool_size).batch(batch_size).repeat()
     data_set_val_iter = data_set_val.make_one_shot_iterator()
 
@@ -94,22 +98,22 @@ def main(argv):
             x_batch, y_batch = sess.run([x_input_bacth, y_target_batch], feed_dict={handle: train_handle})
             train_feed_dict = {x_input: x_batch, y_target: y_batch, dropout: 0.5}
             sess.run(train_step, train_feed_dict)
-            if i % 10 == 0:
+            if i % 50 == 0:
                 train_loss, train_accuracy = sess.run([loss, accuracy], train_feed_dict)
                 print('{} : Generation # {}. Train Loss : {:.3f} . '  'Train Acc : {:.3f}. '.format(time_(), i, train_loss, train_accuracy))
                 summary_writer.add_summary(sess.run(summary_op, train_feed_dict), i)
-            if i % 20 == 0:
+            if i % 100 == 0:
                 val_x_batch, val_y_batch = sess.run([x_input_bacth, y_target_batch], feed_dict={handle: val_handle})
                 val_feed_dict = {x_input: val_x_batch, y_target: val_y_batch, dropout: 1.0}
                 val_loss, val_accuracy = sess.run([loss, accuracy], val_feed_dict)
                 print('{} : Generation # {}. val Loss : {:.3f} . '  'val Acc : {:.3f}. '.format(time_(), i, val_loss, val_accuracy))
-                summary_writer.add_summary(sess.run(summary_op, train_feed_dict), i)
+                #summary_writer.add_summary(sess.run(summary_op, train_feed_dict), i)
                 if val_accuracy >= max_accuracy and i > generations / 2:
                     max_accuracy = val_accuracy
                     # saver.save(sess, os.path.join(model_save_path, save_ckpt_name))
                     saver.save(sess, os.path.join(model_save_path))
                     print('{} : Generation # {}. --model saved--'.format(time_(), i))
-        print('Last accuracy : ', max_accuracy)
+        print('{} : Last accuracy : {}'.format(time_(), max_accuracy))
 
 if __name__ == '__main__':
     tf.app.run()
