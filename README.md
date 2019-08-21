@@ -31,10 +31,11 @@ python read_test_cnn.py
 
 ### 数据集
 
-#### FER
+#### FER 和 FERPlus
 
-#### FER+
+<img src="src/FER+vsFER.png" width="586px"/>
 
+FER(上)和FER+(下)
 
 ## 版权说明
 
