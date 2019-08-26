@@ -16,14 +16,20 @@ Linux + GPU
 ### 训练
 
 ```bash
-python train_val_cnn.py
+python train_test.py \
+--mode train \
+--dataset_path data/FER \
+--output_path data/model \
+--max_step 2000
 ```
 训练结束将在model文件夹下生成cnn_emotion.ckpt文件
 
 ### 测试
 
 ```bash
-python read_test_cnn.py
+python train_test.py \
+--mode test \
+--test_model_folder testmodel
 ```
 读取上一步生成的模型参数并测试模型精度
 
