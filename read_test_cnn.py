@@ -13,10 +13,10 @@ ckpt_path = os.path.join(test_model_folder, ckpt_name)
 emotion_labels = ['angry', 'disgust:', 'fear', 'happy', 'sad', 'surprise', 'neutral']
 num_class = len(emotion_labels)
 
-record_test = 'fer2013_test.tfrecord'
+record_test = 'test/test.tfrecord'
 test_path = os.path.join(data_folder_name, dataset_folder, record_test)
-shuffle_pool_size = 3589
-batch_size = 3589
+shuffle_pool_size = 3000
+batch_size = 3000
 
 def main(argv):
     gpu_options = tf.GPUOptions(allow_growth = True)
