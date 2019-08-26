@@ -15,10 +15,10 @@ flags.DEFINE_integer("val_batch_size", 2000, "The size of a val mini-batch")
 flags.DEFINE_integer("test_batch_size", 3000, "The size of a test mini-batch")
 flags.DEFINE_integer("shuffle_pool_size", 4000, "The size of shuffle pool")
 flags.DEFINE_integer("max_step", 200, "train max step")
-flags.DEFINE_string("dataset_path", "data/FER/", "dataset path")
-flags.DEFINE_string("output_path", "data/model", "model save path")
-flags.DEFINE_string("mode", None, "train or test")
-flags.DEFINE_string("test_model_folder", "testmodel", "test model")
+flags.DEFINE_string("dataset_path", "data/FER/", "dataset path") #数据集路径
+flags.DEFINE_string("output_path", "data/model", "model save path") #保存训练时生成的模型文件
+flags.DEFINE_string("mode", None, "train or test") #训练或测试
+flags.DEFINE_string("test_model_folder", "testmodel", "test model path") #测试时读取模型文件路径
 
 
 channel = 1  # 图像通道数
