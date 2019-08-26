@@ -45,7 +45,7 @@ FER(上)和FERPlus(下)
 
 ## 版权说明
 
-该项目签署了MIT 授权许可，详情请参阅 [LICENSE.md](LICENSE.md)
+该项目签署了MIT 授权许可，详情请参阅 [LICENSE](LICENSE)
 
 ## 鸣谢
 
