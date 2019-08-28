@@ -39,7 +39,7 @@ python train_test.py \
 python show_face.py
 ```
 
-![FERvsFER+](https://github.com/wangz49777/Emotion_recognition/blob/branch1/src/example.png)
+![](https://github.com/wangz49777/Emotion_recognition/blob/branch1/src/example.png)
 
 按q键关闭窗口
 
