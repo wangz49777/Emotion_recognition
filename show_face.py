@@ -2,13 +2,16 @@ import tensorflow as tf
 import cv2
 import os
 import numpy as np
-
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 emo_labels = ['angry', 'disgust:', 'fear', 'happy', 'sad', 'surprise', 'neutral']
+emo_new = ['neutral', 'happiness', 'surprise', 'sadness', 'anger', 'disgust', 'fear', 'contempt', 'unknown']
 num_class = len(emo_labels)
 
 testmodel_path = './testmodel/'
 default_size = 48
+img_size = 48
 channel = 1
 ckpt_name = 'emotion_cnn.ckpt'
 ckpt_path = os.path.join(testmodel_path, ckpt_name)
@@ -36,16 +39,22 @@ while True:
         for face in faceRects:
             x, y, w, h = face
             images=[]
-            rs_sum=np.array([0.0]*num_class)
+            # rs_sum=np.array([0.0]*num_class)
             image = frame_gray[y: y + h, x: x + w ]
-            image = np.resize(image, (default_size, default_size, channel))
+            image=cv2.resize(image,(img_size,img_size))
+            image=image*(1./255)
             images.append(image)
-            images = np.array(images)
-            images = np.multiply(np.array(images), 1. / 255)
+            images.append(cv2.flip(image,1))
+            images.append(cv2.resize(image[2:45,:],(img_size,img_size)))
+            images = np.reshape(images,[3,48,48,1])
+            
             softmax_ = sess.run(softmax, {x_input: images, dropout: 1.0})
-            class_ = np.argmax(softmax_, axis= 1)
-            emo = emo_labels[class_[0]]
-            print ('Emotion : ',emo)
+            softsum = np.sum(softmax_, axis= 0)
+#             class_ = np.argmax(softsum, axis= 1)
+            class_ = np.argmax(softsum)
+            print(class_)
+            emo = emo_new[class_]
+#             print ('Emotion : ',emo)
             cv2.rectangle(frame, (x - 10, y - 10), (x + w + 10, y + h + 10), color, thickness = 2)
             font = cv2.FONT_HERSHEY_SIMPLEX
             cv2.putText(frame,'%s' % emo,(x + 30, y + 30), font, 1, (255,0,255),4)
