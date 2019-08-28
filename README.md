@@ -35,6 +35,14 @@ python train_test.py \
 
 ### 实时识别人脸表情
 
+```bash
+python show_face.py
+```
+
+![FERvsFER+](https://github.com/wangz49777/Emotion_recognition/blob/branch1/src/example.png)
+
+按q键关闭窗口
+
 ### 数据集
 
 #### FER 和 FERPlus
