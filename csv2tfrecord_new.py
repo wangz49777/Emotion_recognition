@@ -62,4 +62,4 @@ def main(argv = None):
     write_binary(record_path_val, val, val_new)
 
 if __name__ == '__main__':
-    main()
+    tf.app.run()
