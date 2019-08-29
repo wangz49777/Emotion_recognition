@@ -35,8 +35,6 @@ python train_test.py \
 
 ### 实时识别人脸表情
 
-<<<<<<< HEAD
-=======
 ```bash
 python show_face.py
 ```
