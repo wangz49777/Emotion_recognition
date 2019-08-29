@@ -4,7 +4,7 @@ import argparse
 import numpy as np
 import emotion_cnn_Entropy as cnn
 import time
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--batch_size", type= int, default= 256, help="The size of a mini-batch")
@@ -19,7 +19,7 @@ parser.add_argument("--testmodel_path", default= "testmodel", help="where to rea
 args = parser.parse_args()
 
 
-channel = 1  # 图像通道数
+channel = 1  # 图像通道数...
 default_height = 48  # 图像宽高
 default_width = 48
 class_num = 8
@@ -104,9 +104,9 @@ def main(argv):
 
             for i in range(1, args.max_steps + 1):
                 x_batch, y_batch = sess.run([x_input_bacth, y_target_batch], feed_dict={handle: train_handle})
-                y_label = np.argmax(y_batch, axis= 1)
-                train_feed_dict = {x_input: x_batch, y_target: y_label, dropout: 0.5}
-                # train_feed_dict = {x_input: x_batch, y_target: y_batch, dropout: 0.5}
+                # y_label = np.argmax(y_batch, axis= 1)
+                # train_feed_dict = {x_input: x_batch, y_target: y_label, dropout: 0.5}
+                train_feed_dict = {x_input: x_batch, y_target: y_batch, dropout: 0.5}
                 sess.run(train_step, train_feed_dict)
                 if i % 50 == 0:
                     train_loss, train_accuracy = sess.run([loss, accuracy], train_feed_dict)
@@ -114,9 +114,9 @@ def main(argv):
                     summary_writer.add_summary(sess.run(summary_op, train_feed_dict), i)
                 if i % 100 == 0:
                     val_x_batch, val_y_batch = sess.run([x_input_bacth, y_target_batch], feed_dict={handle: val_handle})
-                    y_label = np.argmax(y_batch, axis= 1)
-                    val_feed_dict = {x_input: x_batch, y_target: y_label, dropout: 1.0}
-                    # val_feed_dict = {x_input: val_x_batch, y_target: val_y_batch, dropout: 1.0}
+                    # y_label = np.argmax(y_batch, axis= 1)
+                    # val_feed_dict = {x_input: x_batch, y_target: y_label, dropout: 1.0}
+                    val_feed_dict = {x_input: val_x_batch, y_target: val_y_batch, dropout: 1.0}
                     val_loss, val_accuracy = sess.run([loss, accuracy], val_feed_dict)
                     print('{} : Generation # {}. val Loss : {:.3f} . '  'val Acc : {:.3f}. '.format(time_(), i, val_loss, val_accuracy))
                     #summary_writer.add_summary(sess.run(summary_op, train_feed_dict), i)
@@ -151,9 +151,9 @@ def main(argv):
 
             #for i in range(10):
             x_batch, y_batch = sess.run([x_input_bacth, y_target_batch], feed_dict={handle: test_handle})
-            y_label = np.argmax(y_batch, axis= 1)
-            test_feed_dict = {x_input: x_batch, y_target: y_label, dropout: 1.0}
-            # test_feed_dict = {x_input: x_batch, y_target: y_batch, dropout: 1.0}
+            # y_label = np.argmax(y_batch, axis= 1)
+            # test_feed_dict = {x_input: x_batch, y_target: y_label, dropout: 1.0}
+            test_feed_dict = {x_input: x_batch, y_target: y_batch, dropout: 1.0}
             test_accuracy = sess.run(accuracy, test_feed_dict)
             print('Test Acc : {:.3f}. '.format(test_accuracy))
 

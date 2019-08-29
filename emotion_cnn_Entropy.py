@@ -4,7 +4,7 @@ from tensorflow.contrib.layers.python.layers import initializers
 class Emotion_cnn():
     def __init__(self):
         with tf.name_scope("parameters"):
-            self.class_num = 8 #类别个数
+            self.class_num = 8 #类别个数..
             self.channel = 1 #图像通道个数
             self.hidden_dim = 1024 #全连接层维度
             self.full_shape = 2304 #
@@ -91,12 +91,15 @@ class Emotion_cnn():
                 fc_output = tf.add(tf.matmul(output2, out_weight), out_bias, name = 'fc_output')
         return fc_output
     #损失函数和准确率
-    def loss_accuracy(self, logits_, label_):
+    def loss_accuracy(self, logits_, labels_):
         with tf.name_scope("loss"):
-            loss_ = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits = logits_, labels = label_), name = 'cross_entropy_loss')
+            softmax_labels_ = tf.nn.softmax(tf.cast(labels_, dtype= tf.float32))
+            loss_ = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits= logits_, labels= softmax_labels_), name= 'cross_entropy_loss')
+            # loss_ = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits = logits_, labels = label_), name = 'cross_entropy_loss')
         with tf.name_scope("evaluate"):
             softmax = tf.nn.softmax(logits_, name = 'softmax')
-            accuracy_ = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(softmax, axis = 1),tf.cast(label_, tf.int64)), tf.float32), name = 'accuracy')
+            labels_ = tf.argmax(labels_, axis= 1)
+            accuracy_ = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(softmax, axis = 1),tf.cast(labels_, tf.int64)), tf.float32), name = 'accuracy')
         return loss_, accuracy_
     #优化方法
     def optimizer(self, loss_):
