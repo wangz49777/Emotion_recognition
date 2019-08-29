@@ -45,7 +45,6 @@ python show_face.py
 
 按q键关闭窗口
 
->>>>>>> d6da3813385f1c49b347f4689a509a75fc894748
 ### 数据集
 
 #### FER 和 FERPlus
