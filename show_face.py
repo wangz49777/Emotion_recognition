@@ -10,7 +10,7 @@ emo_labels = ['angry', 'disgust:', 'fear', 'happy', 'sad', 'surprise', 'neutral'
 emo_new = ['neutral', 'happiness', 'surprise', 'sadness', 'anger', 'disgust', 'fear', 'contempt', 'unknown']
 num_class = len(emo_labels)
 
-testmodel_path = './estmodel/'
+testmodel_path = './testmodel/'
 default_size = 48
 img_size = 48
 channel = 1
