@@ -1,2 +1,0 @@
-model_checkpoint_path: "emotion_cnn.ckpt"
-all_model_checkpoint_paths: "emotion_cnn.ckpt"
