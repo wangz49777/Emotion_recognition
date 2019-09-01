@@ -1,6 +1,7 @@
 import tensorflow as tf
 import cv2
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -9,7 +10,7 @@ emo_labels = ['angry', 'disgust:', 'fear', 'happy', 'sad', 'surprise', 'neutral'
 emo_new = ['neutral', 'happiness', 'surprise', 'sadness', 'anger', 'disgust', 'fear', 'contempt', 'unknown']
 num_class = len(emo_labels)
 
-testmodel_path = './testmodel/'
+testmodel_path = './estmodel/'
 default_size = 48
 img_size = 48
 channel = 1
@@ -17,10 +18,10 @@ ckpt_name = 'emotion_cnn.ckpt'
 ckpt_path = os.path.join(testmodel_path, ckpt_name)
 cascade_path = os.path.join(testmodel_path, 'haarcascade_frontalface_alt.xml')
 
-gpu_options = tf.GPUOptions(allow_growth = True)
-config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True)
-sess = tf.Session(config = config)
-saver = tf.train.import_meta_graph(ckpt_path + '.meta')
+gpu_options = tf.compat.v1.GPUOptions(allow_growth = True)
+config = tf.compat.v1.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True)
+sess = tf.compat.v1.Session(config = config)
+saver = tf.compat.v1.train.import_meta_graph(ckpt_path + ".meta")
 saver.restore(sess, ckpt_path)
 graph = tf.get_default_graph()
 

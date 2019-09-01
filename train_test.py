@@ -164,4 +164,4 @@ def main(argv):
         print('select the mode : train or test')
 
 if __name__ == '__main__':
-    tf.app.run()
+    tf.compat.v1.app.run()
